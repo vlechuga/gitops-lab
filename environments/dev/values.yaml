@@ -1,7 +1,7 @@
 replicaCount: 3
 image:
-  repository: nginx
-  tag: latest
+  repository: ghcr.io/vlechuga/gitops-lab
+  tag: latest  
 service:
   type: ClusterIP
   port: 80
