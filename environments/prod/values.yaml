@@ -10,7 +10,7 @@ ingress:
   className: nginx
   annotations: {}
   hosts:
-    - host: nginx-dev.192.168.49.2.nip.io
+    - host: nginx-prod.192.168.49.2.nip.io
       paths:
         - path: /
           pathType: Prefix
