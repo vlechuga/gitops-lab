@@ -1,27 +1,37 @@
-name: Validate Helm Chart
+name: CI
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+permissions:
+  contents: read
+  packages: write
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install Helm
-        uses: azure/setup-helm@v4
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
       - name: Helm Lint
+        run: helm lint nginx-chart
+      - name: Render DEV
+        run: helm template nginx-dev nginx-chart -f environments/dev/values.yaml
+      - name: Render PROD
+        run: helm template nginx-prod nginx-chart -f environments/prod/values.yaml
+  docker:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Image
         run: |
-          helm lint nginx-chart
-      - name: Render DEV manifests
+          docker build -t ghcr.io/${{ github.repository_owner }}/gitops-lab:${{ github.sha }} ./app
+      - name: Push Image
         run: |
-          helm template nginx-dev nginx-chart \
-            -f environments/dev/values.yaml
-      - name: Render PROD manifests
-        run: |
-          helm template nginx-prod nginx-chart \
-            -f environments/prod/values.yaml
+          docker push ghcr.io/${{ github.repository_owner }}/gitops-lab:${{ github.sha }}
