@@ -1,7 +1,4 @@
 replicaCount: 3
-ingress:
-  enabled: true
-  className: nginx
 image:
   repository: nginx
   tag: latest
