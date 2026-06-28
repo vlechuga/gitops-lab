@@ -4,7 +4,7 @@ on:
     branches:
       - main
 permissions:
-  contents: read
+  contents: write
   packages: write
 jobs:
   validate:
@@ -31,7 +31,27 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/gitops-lab:${{ github.sha }} ./app
+          docker build \
+            -t ghcr.io/${{ github.repository_owner }}/gitops-lab:${{ github.sha }} \
+            ./app
       - name: Push Image
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/gitops-lab:${{ github.sha }}
+  update-values:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update image tag
+        run: |
+          sed -i "s/tag:.*/tag: ${GITHUB_SHA}/" environments/dev/values.yaml
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add environments/dev/values.yaml
+          git diff --cached --quiet || git commit -m "chore: update image tag [skip ci]"
+      - name: Push
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
