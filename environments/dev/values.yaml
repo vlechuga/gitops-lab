@@ -1,7 +1,7 @@
 replicaCount: 1
 image:
   repository: ghcr.io/vlechuga/gitops-lab
-  tag: f3f93b422d4f80800f202c8cc44731083fafb9ad
+  tag: 7a2ea4be8778df6ba9dcc36dabb9fdaf0ed7e3e1
 service:
   type: ClusterIP
   port: 80
