@@ -3,10 +3,8 @@ kind: Application
 metadata:
   name: nginx-dev
   namespace: argocd
-
 spec:
   project: default
-
   source:
     repoURL: https://github.com/vlechuga/gitops-lab.git
     targetRevision: main
@@ -14,12 +12,12 @@ spec:
     helm:
       valueFiles:
         - ../environments/dev/values.yaml
-
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
-
+    namespace: dev
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+  syncOptions:
+    - CreateNamespace=true
